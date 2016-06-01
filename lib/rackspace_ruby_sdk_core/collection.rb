@@ -1,0 +1,2 @@
+class Peace::Collection
+end
