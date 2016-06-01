@@ -66,14 +66,14 @@ module Peace::ORM
     end
 
     # A symbol that describes the JSON key name where the object
-    # data is stored in the Rackspace API payload.
+    # data is stored in the Peace API payload.
     def json_key_name(sym)
       @json_key_name = sym.to_s
     end
 
     # Find the endpoint for a Service by name and region
     def service_url
-      @service_url ||= Rackspace.service_catalog.url_for(service_name)
+      @service_url ||= Peace.service_catalog.url_for(service_name)
     end
 
     # Provide the service name based on the child (calling) class

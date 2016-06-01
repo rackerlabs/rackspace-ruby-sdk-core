@@ -19,7 +19,7 @@ class Peace::Model
   end
 
   def resource_name
-    @resource_name ||= self.class.to_s.split('::').last.downcase
+    self.class.to_s.split('::').last.downcase
   end
 
 
@@ -37,7 +37,7 @@ class Peace::Model
       begin
         self.send("#{k}=", v)
       rescue Exception => e
-        Rackspace.logger.error "Peace::Model#refresh failed: #{e}"
+        Peace.logger.error "Peace::Model#refresh failed: #{e}"
       end
     end
 

@@ -5,7 +5,7 @@ require 'rackspace_ruby_sdk_core/version'
 
 Gem::Specification.new do |s|
   s.name          = "rackspace_ruby_sdk_core"
-  s.version       = RackspaceRubySdkCore::VERSION
+  s.version       = PeaceRubySdkCore::VERSION
   s.authors       = ["Matt Darby"]
   s.email         = ["matt.darby@rackspace.com"]
 

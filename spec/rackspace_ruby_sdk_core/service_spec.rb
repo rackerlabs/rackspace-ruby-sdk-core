@@ -1,7 +1,15 @@
 require 'spec_helper'
 
-describe Peace::Service do
+module Testing
+  class Network < Peace::Service
+  end
+end
 
-  it 'knows the service_name'
+describe Peace::Service do
+  let(:service){ Testing::Network.new }
+
+  it 'knows the service_name' do
+    expect(service.class.service_name).to eq :network
+  end
 
 end
