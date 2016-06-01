@@ -17,8 +17,6 @@ class Peace::ServiceCatalog
     @catalog ||= begin
       Rackspace.logger.debug 'Loading ServiceCatalog'
 
-      # qAZomDJMvaMxf7ajFPhpV8tQy
-
       api_key   = ENV['RS_API_KEY']
       username  = ENV['RS_USERNAME']
       region    = ENV['RS_REGION_NAME']

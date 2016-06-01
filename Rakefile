@@ -5,11 +5,6 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
 
-desc "Run the test suite"
-task :spec do
-  exec "rspec"
-end
-
 desc "Start a terminal with this gem preloaded."
 task :console do
   exec "irb -r rackspace_ruby_sdk_core -I ./lib"
