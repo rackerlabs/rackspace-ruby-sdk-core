@@ -1,10 +1,10 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'rackspace_ruby_sdk_core/version'
+require 'rackspace-ruby-sdk-core/version'
 
 Gem::Specification.new do |s|
-  s.name          = "rackspace_ruby_sdk_core"
+  s.name          = "rackspace-ruby-sdk-core"
   s.version       = PeaceRubySdkCore::VERSION
   s.authors       = ["Matt Darby"]
   s.email         = ["matt.darby@rackspace.com"]

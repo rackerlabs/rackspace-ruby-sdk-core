@@ -7,5 +7,5 @@ task :default => :spec
 
 desc "Start a terminal with this gem preloaded."
 task :console do
-  exec "irb -r rackspace_ruby_sdk_core -I ./lib"
+  exec "irb -r rackspace-ruby-sdk-core -I ./lib"
 end
