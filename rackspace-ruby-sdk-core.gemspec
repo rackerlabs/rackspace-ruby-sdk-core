@@ -9,24 +9,15 @@ Gem::Specification.new do |s|
   s.authors       = ["Matt Darby"]
   s.email         = ["matt.darby@rackspace.com"]
 
-  s.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  s.description   = %q{TODO: Write a longer description or delete this line.}
-  s.homepage      = "TODO: Put your gem's website or public repo URL here."
+  s.summary       = "Core bits of Rackspace's Ruby SDKs"
+  s.description   = "Core bits of Rackspace's Ruby SDKs"
+  s.homepage      = "https://github.com/rackerlabs/rackspace-ruby-sdk-core"
   s.license       = "MIT"
-
-  # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
-  # delete this section to allow pushing this gem to any host.
-  if s.respond_to?(:metadata)
-    s.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
-  end
 
   s.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   s.bindir        = "exe"
   s.executables   = s.files.grep(%r{^exe/}) { |f| File.basename(f) }
   s.require_paths = ["lib"]
-
 
   s.add_dependency "rest-client"
   s.add_dependency "activesupport"
