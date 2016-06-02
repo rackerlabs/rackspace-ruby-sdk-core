@@ -5,36 +5,56 @@ require 'pry'
 
 class Peace::ServiceCatalog
 
-  if ENV['RACKSPACE_MOCK'] == 'true'
-    BASE_URL = "http://openstack.dev/v2.0/tokens"
-  else
-    BASE_URL = "https://identity.api.rackspacecloud.com/v2.0/tokens"
-  end
+  RACKSPACE_AUTH_URL = "https://identity.api.rackspacecloud.com/v2.0/tokens"
 
   attr_accessor :id, :services, :access_token, :region, :tenant_id
 
-  def self.load!(host)
-    if host == :rackspace
-      @catalog ||= begin
-        Peace.logger.debug 'Loading ServiceCatalog'
+  class << self
+    def load!(host)
+      info = case host
+        when :rackspace then rackspace_based_auth
+        when :openstack then openstack_based_auth
+        else
+          raise "Requires either :rackspace or :openstack as `host`"
+        end
 
-        api_key   = ENV['RS_API_KEY']
-        username  = ENV['RS_USERNAME']
-        region    = ENV['RS_REGION_NAME']
-        headers   = {content_type: :json, accept: :json}
-        body      = { "auth": { "RAX-KSKEY:apiKeyCredentials": { "apiKey": api_key, "username": username } } }
-        response  = ::RestClient.post(BASE_URL, body.to_json, headers)
-        body      = JSON.parse(response.body)
-        hash      = body['access']['serviceCatalog']
-        token     = body['access']['token']['id']
-        tenant_id = body['access']['token']['tenant']['id']
+      auth_url  = info[:auth_url]
+      body      = info[:body]
+      region    = info[:region]
 
-        Peace::ServiceCatalog.new(hash, token, region, tenant_id)
-      end
-    elsif host == :openstack
-      raise "Not yet supported"
-    else
-      raise "Requires either :rackspace or :openstack as `host`"
+      headers   = {content_type: :json, accept: :json}
+      response  = ::RestClient.post(auth_url, body, headers)
+      body      = JSON.parse(response.body)
+
+      hash      = body['access']['serviceCatalog']
+      token     = body['access']['token']['id']
+      tenant_id = body['access']['token']['tenant']['id']
+
+      Peace::ServiceCatalog.new(hash, token, region, tenant_id)
+    end
+
+    private
+
+    def rackspace_based_auth
+      Peace.logger.debug 'Loading Rackspace ServiceCatalog'
+
+      auth_url = RACKSPACE_AUTH_URL
+      api_key  = ENV['RS_API_KEY']
+      username = ENV['RS_USERNAME']
+      region   = ENV['RS_REGION_NAME']
+      body     = { "auth": { "RAX-KSKEY:apiKeyCredentials": { "apiKey": api_key, "username": username } } }.to_json
+      { auth_url: auth_url, body: body, region: region }
+    end
+
+    def openstack_based_auth
+      Peace.logger.debug 'Loading OpenStack ServiceCatalog'
+
+      auth_url = ENV['OS_AUTH_URL']
+      username = ENV['OS_USERNAME']
+      password = ENV['OS_PASSWORD']
+      tenant   = ENV['OS_TENANT_NAME']
+      body     = { "auth": { "tenantName": "#{tenant}", "passwordCredentials": { "username": "#{username}", "password": "#{password}" } } }.to_json
+      { auth_url: auth_url, body: body, region: nil }
     end
   end
 
