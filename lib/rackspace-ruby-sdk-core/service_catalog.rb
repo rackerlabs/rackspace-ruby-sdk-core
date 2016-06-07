@@ -30,7 +30,7 @@ class Peace::ServiceCatalog
       token     = body['access']['token']['id']
       tenant_id = body['access']['token']['tenant']['id']
 
-      Peace::ServiceCatalog.new(hash, token, region, tenant_id)
+      Peace::ServiceCatalog.new(hash, token, region, tenant_id, host)
     end
 
     private
@@ -47,8 +47,16 @@ class Peace::ServiceCatalog
       raise "ENV['RS_USERNAME'] not set" unless username
       raise "ENV['RS_REGION_NAME'] not set" unless region
 
-      body     = { "auth": { "RAX-KSKEY:apiKeyCredentials": { "apiKey": api_key, "username": username } } }.to_json
-      { auth_url: auth_url, body: body, region: region }
+      body = {
+        "auth": {
+          "RAX-KSKEY:apiKeyCredentials": {
+            "apiKey": api_key,
+            "username": username
+          }
+        }
+      }
+
+      { auth_url: auth_url, body: body.to_json, region: region }
     end
 
     def openstack_based_auth
@@ -64,32 +72,42 @@ class Peace::ServiceCatalog
       raise "ENV['OS_PASSWORD'] not set" unless password
       raise "ENV['OS_TENANT_NAME'] not set" unless tenant
 
-      body     = { "auth": { "tenantName": "#{tenant}", "passwordCredentials": { "username": "#{username}", "password": "#{password}" } } }.to_json
-      { auth_url: auth_url, body: body, region: nil }
+      body = {
+        "auth": {
+          "tenantName": "#{tenant}",
+          "passwordCredentials": {
+            "username": "#{username}",
+            "password": "#{password}"
+          }
+        }
+      }
+
+      { auth_url: auth_url, body: body.to_json, region: nil }
     end
   end
 
-  def initialize(hash, token, region, tenant_id)
+  def initialize(hash, token, region, tenant_id, sdk)
     @access_token    = token
     @region          = region
     @services        = hash.map{ |s| Service.new(s) }
     Peace.tenant_id  = tenant_id
     Peace.auth_token = token
+    Peace.sdk        = sdk
   end
 
   def available_services
     names = services.map(&:name).inject([]) do |memo, rax_name|
-      service = Peace::SERVICE_NAME_MAP.find{|k,v| v == rax_name }
+      service = ::SERVICE_NAME_MAP.find{|k,v| v == rax_name }
       memo << service[0] if service
       memo
     end.sort
 
-    names.map{ |name| Peace::SERVICE_KLASSES[name] }.compact
+    names.map{ |name| ::SERVICE_KLASSES[name] }.compact
   end
 
   def url_for(our_service_name)
     service = services.find do |s|
-      s.name == Peace::SERVICE_NAME_MAP[our_service_name]
+      s.name == ::SERVICE_NAME_MAP[our_service_name]
     end
 
     if service
