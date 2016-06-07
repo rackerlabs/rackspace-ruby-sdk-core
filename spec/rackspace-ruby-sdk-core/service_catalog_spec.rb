@@ -28,6 +28,14 @@ describe Peace::ServiceCatalog do
     it 'knows the URL for a service based on name and region' do
       expect(Peace.service_catalog.url_for('compute')).not_to be_nil
     end
+
+    it 'expects these env vars' do
+      %w{RS_API_KEY RS_USERNAME RS_REGION_NAME}.each do |var|
+        ENV[var] = nil
+        expect{ Peace::ServiceCatalog.load!(:rackspace) }.to raise_error RuntimeError
+        ENV[var] = "something"
+      end
+    end
   end
 
   describe "OpenStack-based catalogs" do
@@ -51,6 +59,14 @@ describe Peace::ServiceCatalog do
 
     it 'knows the URL for a service based on name and region' do
       expect(Peace.service_catalog.url_for('compute')).not_to be_nil
+    end
+
+    it 'expects these env vars' do
+      %w{OS_AUTH_URL OS_USERNAME OS_PASSWORD OS_TENANT_NAME}.each do |var|
+        ENV[var] = nil
+        expect{ Peace::ServiceCatalog.load!(:openstack) }.to raise_error RuntimeError
+        ENV[var] = "something"
+      end
     end
   end
 

@@ -42,6 +42,11 @@ class Peace::ServiceCatalog
       api_key  = ENV['RS_API_KEY']
       username = ENV['RS_USERNAME']
       region   = ENV['RS_REGION_NAME']
+
+      raise "ENV['RS_API_KEY'] not set" unless api_key
+      raise "ENV['RS_USERNAME'] not set" unless username
+      raise "ENV['RS_REGION_NAME'] not set" unless region
+
       body     = { "auth": { "RAX-KSKEY:apiKeyCredentials": { "apiKey": api_key, "username": username } } }.to_json
       { auth_url: auth_url, body: body, region: region }
     end
@@ -53,6 +58,12 @@ class Peace::ServiceCatalog
       username = ENV['OS_USERNAME']
       password = ENV['OS_PASSWORD']
       tenant   = ENV['OS_TENANT_NAME']
+
+      raise "ENV['OS_AUTH_URL'] not set" unless auth_url
+      raise "ENV['OS_USERNAME'] not set" unless username
+      raise "ENV['OS_PASSWORD'] not set" unless password
+      raise "ENV['OS_TENANT_NAME'] not set" unless tenant
+
       body     = { "auth": { "tenantName": "#{tenant}", "passwordCredentials": { "username": "#{username}", "password": "#{password}" } } }.to_json
       { auth_url: auth_url, body: body, region: nil }
     end
