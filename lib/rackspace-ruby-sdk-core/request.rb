@@ -4,29 +4,41 @@ require 'rest-client'
 class Peace::Request
   class << self
     def get(url)
-      Peace.logger.debug "GET: #{url}"
-      request = RestClient.get(url, headers)
-      JSON.parse(request)
+      request! do
+        Peace.logger.debug "GET: #{url}"
+        RestClient.get(url, headers)
+      end
     end
 
     def post(url, data)
-      Peace.logger.debug "POST: #{url}: #{data}"
-      request = RestClient.post(url, data.to_json, headers)
-      JSON.parse(request)
+      request! do
+        Peace.logger.debug "POST: #{url}: #{data}"
+        RestClient.post(url, data.to_json, headers)
+      end
     end
 
     def put(url, data)
-      Peace.logger.debug "PUT: #{url}: #{data}"
-      request = RestClient.put(url, data.to_json, headers)
-      JSON.parse(request)
+      request! do
+        Peace.logger.debug "PUT: #{url}: #{data}"
+        RestClient.put(url, data.to_json, headers)
+      end
     end
 
     def delete(url)
-      Peace.logger.debug "DELETE: #{url}"
-      RestClient.delete(url, headers) == ""
+      request! do
+        Peace.logger.debug "DELETE: #{url}"
+        RestClient.delete(url, headers) == ""
+      end
     end
 
     private
+
+    def request!(&block)
+      JSON.parse(block.call)
+    rescue Exception => e
+      msg = JSON.parse(e.response)["badRequest"]["message"]
+      raise Peace::BadRequest.new(msg)
+    end
 
     def headers
       Peace::ServiceCatalog.load! unless Peace.auth_token
