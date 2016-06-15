@@ -11,7 +11,7 @@ class Peace::ServiceCatalog
 
   class << self
     def load!(host)
-      info = case host
+      info = case host.to_sym
         when :rackspace then rackspace_based_auth
         when :openstack then openstack_based_auth
         else
@@ -22,7 +22,7 @@ class Peace::ServiceCatalog
       body      = info[:body]
       region    = info[:region]
 
-      headers   = {content_type: :json, accept: :json}
+      headers   = { content_type: :json, accept: :json }
       response  = ::RestClient.post(auth_url, body, headers)
       body      = JSON.parse(response.body)
 

@@ -26,7 +26,12 @@ module Peace
     end
 
     def service_catalog
-      host = ENV['OS_AUTH_URL'].present? ? :openstack : :rackspace
+      host = ENV['SDK'].to_s
+
+      if host == "" || host.nil? || !%w{openstack rackspace}.include?(host)
+        raise "ENV['SDK'] must be either 'openstack' or 'rackspace'"
+      end
+
       @@service_catalog ||= Peace::ServiceCatalog.load!(host)
     end
 
