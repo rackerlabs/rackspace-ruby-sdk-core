@@ -27,15 +27,21 @@ class Peace::Request
     def delete(url)
       request! do
         Peace.logger.debug "DELETE: #{url}"
-        RestClient.delete(url, headers) == ""
+        RestClient.delete(url, headers)
       end
     end
 
     private
 
     def request!(&block)
-      JSON.parse(block.call)
-    rescue Exception => e
+      response = block.call
+      response == "" ? true : JSON.parse(response)
+    rescue JSON::ParserError => e
+      raise Peace::BadRequest.new(e)
+    rescue RestClient::Conflict => e
+      msg = JSON.parse(e.response)["conflictingRequest"]["message"]
+      raise Peace::BadRequest.new(msg)
+    rescue RestClient::BadRequest => e
       msg = JSON.parse(e.response)["badRequest"]["message"]
       raise Peace::BadRequest.new(msg)
     end
