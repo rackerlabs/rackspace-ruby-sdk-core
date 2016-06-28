@@ -24,12 +24,14 @@ module Peace::Model
     alias_keys = self.class.alias_map.keys
     hash       = {}
 
-    self.class.attributes.each do |(k,v)|
-      if alias_keys.include?(k)
-        original_name = self.class.alias_map[k].first
+    self.class.attributes.each do |a|
+      v = self.send(a)
+
+      if alias_keys.include?(a)
+        original_name = self.class.alias_map[a].first
         hash.merge!({ "#{original_name}" => v })
       else
-        hash.merge!({ "#{k}" => v })
+        hash.merge!({ "#{a}" => v })
       end
     end
 
