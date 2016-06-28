@@ -2,7 +2,8 @@ require 'spec_helper'
 
 module Testing
   module Compute
-    class Server < Peace::Model
+    class Server
+      include Peace::Model
     end
   end
 end
