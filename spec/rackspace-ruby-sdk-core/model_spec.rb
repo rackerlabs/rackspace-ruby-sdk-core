@@ -4,6 +4,9 @@ module Testing
   module Compute
     class Server
       include Peace::Model
+
+      attr_accessor :foo
+      attr_with_alias :bandwidth, 'rax-bandwidth:bandwidth'
     end
   end
 end
@@ -20,7 +23,7 @@ describe Peace::Model do
   end
 
   it 'knows how to serialize into json' do
-    expect(model.to_json).to eq "{\"server\":{}}"
+    expect(model.to_json).to eq "{\"server\":{\"foo\":null,\"rax-bandwidth:bandwidth\":null}}"
   end
 
 end

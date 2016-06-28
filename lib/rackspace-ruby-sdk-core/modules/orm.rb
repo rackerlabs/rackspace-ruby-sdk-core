@@ -26,11 +26,6 @@ module Peace::ORM
     url
   end
 
-  # def as_json(options=nil)
-  #   options = { root: true }
-  #   super(options)
-  # end
-
 
   module ClassMethods
 
