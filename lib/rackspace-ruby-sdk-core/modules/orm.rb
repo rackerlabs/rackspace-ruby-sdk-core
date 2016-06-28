@@ -2,6 +2,7 @@ module Peace::ORM
 
   def self.included(klass)
     klass.extend ClassMethods
+    klass.class_variable_set :@@alias_map, {}
   end
 
   def save
@@ -33,6 +34,10 @@ module Peace::ORM
 
 
   module ClassMethods
+
+    def alias_map
+      self.class_variable_get :@@alias_map
+    end
 
     def all(attrs={})
       response = Peace::Request.get(collection_url(attrs))
@@ -93,6 +98,17 @@ module Peace::ORM
     end
 
     def attr_with_alias(original, *others)
+      update_alias_map(original, *others)
+      setup_attribute_aliases(original, *others)
+    end
+
+    private
+
+    def update_alias_map(original, *others)
+      alias_map.merge!({ "#{original}" => [*others].map(&:to_s) })
+    end
+
+    def setup_attribute_aliases(original, *others)
       [*others].each do |o|
         attr_accessor original
         new_writer      = "#{o}="
@@ -101,8 +117,6 @@ module Peace::ORM
         alias_method(new_writer, original_writer) if method_defined? original_writer
       end
     end
-
-    private
 
     def build_api_url!(attrs)
       path = @rackspace_api_path.dup
