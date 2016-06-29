@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 module Testing
-  class Network < Peace::Service
+  class Network
+    include Peace::Service
   end
 end
 
