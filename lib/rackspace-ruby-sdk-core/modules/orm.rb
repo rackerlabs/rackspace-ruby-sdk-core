@@ -51,7 +51,11 @@ module Peace::ORM
     end
 
     def create(options={})
-      self.new(options).save
+      wrapper  = collection_name.singularize
+      payload  = {"#{wrapper}" => options}
+      response = Peace::Request.post(collection_url, payload)
+
+      self.new(response)
     end
 
     # A Mustache-inspired templated string that overrides
