@@ -6,6 +6,8 @@ module Peace
       additional = match[1].split("', '").sort.join(', ')
 
       super "These fields were unexpected: #{additional}"
+    rescue
+      super msg
     end
   end
 end
