@@ -44,7 +44,7 @@ module Peace::Model
   end
 
   def resource_name
-    self.class.to_s.split('::').last.downcase
+    self.class.to_s.split('::').last.camelize(:lower)
   end
 
   private
