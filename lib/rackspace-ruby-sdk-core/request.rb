@@ -6,28 +6,36 @@ class Peace::Request
     def get(url)
       request! do
         Peace.logger.debug "GET: #{url}"
-        RestClient.get(url, headers)
+        response = RestClient.get(url, headers)
+        Peace.logger.debug response
+        response
       end
     end
 
     def post(url, data)
       request! do
         Peace.logger.debug "POST: #{url}: #{data}"
-        RestClient.post(url, data.to_json, headers)
+        response = RestClient.post(url, data.to_json, headers)
+        Peace.logger.debug response
+        response
       end
     end
 
     def put(url, data)
       request! do
         Peace.logger.debug "PUT: #{url}: #{data}"
-        RestClient.put(url, data.to_json, headers)
+        response = RestClient.put(url, data.to_json, headers)
+        Peace.logger.debug response
+        response
       end
     end
 
     def delete(url)
       request! do
         Peace.logger.debug "DELETE: #{url}"
-        RestClient.delete(url, headers)
+        response = RestClient.delete(url, headers)
+        Peace.logger.debug response
+        response
       end
     end
 
