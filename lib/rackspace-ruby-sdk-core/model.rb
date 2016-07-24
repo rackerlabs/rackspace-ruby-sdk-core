@@ -81,7 +81,7 @@ module Peace::Model
     end
 
     def resource_name
-      @resource_name ||= self.to_s.split('::').last.downcase
+      @resource_name ||= self.to_s.split('::').last.camelize(:lower)
     end
 
     def attributes

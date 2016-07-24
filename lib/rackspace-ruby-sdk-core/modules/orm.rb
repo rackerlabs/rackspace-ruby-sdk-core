@@ -42,7 +42,7 @@ module Peace::ORM
 
     # Find a particular object
     def find(id)
-      all.find{ |o| o.id == id }
+      all.find{ |o| o.id == id.to_s }
     end
 
     # Get the first object

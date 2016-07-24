@@ -1,18 +1,14 @@
 module Peace::Metadata
 
-  def self.included(klass)
-    klass.extend ClassMethods
+  def get_metadata
+    Peace::Request.get("#{self.url}/metadata")
   end
 
-  def get_metadata; end
-  def set_metadata; end
-  def delete_metadata; end
-
-  def get_metadata_item; end
-  def set_metadata_item; end
-  def delete_metadata_item; end
-
-  module ClassMethods
+  def set_metadata(hash)
+    url = "#{self.url}/metadata"
+    Peace::Request.put(url, { metadata: hash })
+    self.reload
+    self.metadata
   end
 end
 
@@ -25,6 +21,3 @@ end
 # storage/object
 # queue/queue
 # orchestration/resource
-#
-# # MetadataItem
-# compute/image
