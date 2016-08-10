@@ -66,7 +66,8 @@ module Peace::ORM
 
     # A symbol that describes the JSON key name where the object
     # data is stored in the Peace API payload.
-    def json_key_name(sym)
+    def json_key_name(sym=nil)
+      return @json_key_name unless sym
       @json_key_name = sym.to_s
     end
 

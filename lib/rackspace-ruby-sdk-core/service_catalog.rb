@@ -7,7 +7,7 @@ class Peace::ServiceCatalog
 
   RACKSPACE_AUTH_URL = "https://identity.api.rackspacecloud.com/v2.0/tokens"
 
-  attr_accessor :id, :services, :access_token, :region, :tenant_id
+  attr_accessor :id, :services, :access_token, :region
 
   class << self
     def load!(host)
@@ -18,19 +18,16 @@ class Peace::ServiceCatalog
           raise "Requires either :rackspace or :openstack as `host`"
         end
 
-      auth_url  = info[:auth_url]
-      body      = info[:body]
-      region    = info[:region]
+      auth_url = info[:auth_url]
+      body     = info[:body]
+      region   = info[:region]
+      headers  = { content_type: :json, accept: :json }
+      response = ::RestClient.post(auth_url, body, headers)
+      token    = response.headers[:x_subject_token]
+      body     = JSON.parse(response.body)
+      catalog  = body['token']['catalog']
 
-      headers   = { content_type: :json, accept: :json }
-      response  = ::RestClient.post(auth_url, body, headers)
-      body      = JSON.parse(response.body)
-
-      hash      = body['access']['serviceCatalog']
-      token     = body['access']['token']['id']
-      tenant_id = body['access']['token']['tenant']['id']
-
-      Peace::ServiceCatalog.new(hash, token, region, tenant_id, host)
+      Peace::ServiceCatalog.new(catalog, token, host)
     end
 
     private
@@ -62,35 +59,54 @@ class Peace::ServiceCatalog
     def openstack_based_auth
       Peace.logger.debug 'Loading OpenStack ServiceCatalog'
 
-      auth_url = ENV['OS_AUTH_URL']
-      username = ENV['OS_USERNAME']
-      password = ENV['OS_PASSWORD']
-      tenant   = ENV['OS_TENANT_NAME']
+      auth_url   = ENV['OS_AUTH_URL']
+      username   = ENV['OS_USERNAME']
+      password   = ENV['OS_PASSWORD']
+      tenant     = ENV['OS_TENANT_NAME']
+      tenant_id  = ENV['OS_TENANT_ID']
+      project_id = ENV['OS_PROJECT_ID']
+      region     = ENV['OS_REGION_NAME']
 
       raise "ENV['OS_AUTH_URL'] not set" unless auth_url
       raise "ENV['OS_USERNAME'] not set" unless username
       raise "ENV['OS_PASSWORD'] not set" unless password
       raise "ENV['OS_TENANT_NAME'] not set" unless tenant
+      raise "ENV['OS_TENANT_ID'] not set" unless tenant_id
+      raise "ENV['OS_PROJECT_ID'] not set" unless project_id
+      raise "ENV['OS_REGION_NAME'] not set" unless region
+
+      if auth_url =~ /v3$/
+        auth_url = "#{auth_url}/auth/tokens"
+      end
 
       body = {
         "auth": {
-          "tenantName": "#{tenant}",
-          "passwordCredentials": {
-            "username": "#{username}",
-            "password": "#{password}"
+          "identity": {
+            "methods": ["password"],
+            "password": {
+              "user": {
+                "id": "#{tenant_id}",
+                "password": "#{password}"
+              }
+            }
+          },
+          "scope": {
+            "project": {
+              "id": "#{project_id}"
+            }
           }
         }
       }
 
-      { auth_url: auth_url, body: body.to_json, region: nil }
+      { auth_url: auth_url, body: body.to_json, region: region }
     end
   end
 
-  def initialize(hash, token, region, tenant_id, sdk)
+  def initialize(catalog, token, sdk)
     @access_token    = token
-    @region          = region
-    @services        = hash.map{ |s| Service.new(s) }
-    Peace.tenant_id  = tenant_id
+    @region          = ENV['OS_REGION_NAME']
+    @services        = catalog.map{ |s| Service.new(s) }
+    Peace.tenant_id  = ENV['OS_PROJECT_ID']
     Peace.auth_token = token
     Peace.sdk        = sdk
   end
@@ -114,9 +130,11 @@ class Peace::ServiceCatalog
       endpoints = service.endpoints
 
       if endpoints.size == 1 # regionless
-        endpoints.first.public_url
+        endpoints.first.url
       else
-        endpoints.find{ |e| e.region.downcase == region.downcase }.public_url
+        endpoints.find do |e|
+          e.region == region.downcase && e.interface == "public"
+        end.url
       end
     else
       raise "No service '#{our_service_name}' found"
@@ -134,15 +152,14 @@ class Peace::ServiceCatalog
       @endpoints = hash['endpoints'].map{ |ep| Endpoint.new(ep) }
     end
 
-
     class Endpoint
-      attr_accessor :id, :region, :tenant_id, :public_url, :internal_url
+      attr_accessor :id, :region, :url, :interface
 
       def initialize(hash)
-        @region       = hash['region']
-        @tenant_id    = hash['tenantId']
-        @public_url   = hash['publicURL']
-        @internal_url = hash['internalURL']
+        @id        = hash['id']
+        @region    = hash['region'].downcase
+        @url       = hash['url']
+        @interface = hash['interface']
       end
     end
   end

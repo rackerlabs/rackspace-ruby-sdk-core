@@ -44,6 +44,9 @@ module Peace::Model
   end
 
   def resource_name
+    override = self.class.json_key_name
+    return override if override.present?
+
     self.class.to_s.split('::').last.camelize(:lower)
   end
 
