@@ -54,11 +54,8 @@ module Peace::Model
 
   def refresh!(hash)
     keys      = hash.keys
-    is_nested = (keys.count == 1 && keys.first == resource_name)
+    is_nested = (keys.count == 1 && resource_names.include?(keys.first))
     hash      = is_nested ? hash.first[1] : hash
-
-    # TODO: Why does this key exist? How does it get inserted? Why? BUG
-    hash.delete("resource_name")
 
     hash.each do |(k,v)|
       begin
@@ -69,6 +66,10 @@ module Peace::Model
     end
 
     self
+  end
+
+  def resource_names
+    [resource_name, resource_name.singularize]
   end
 
 
