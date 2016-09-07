@@ -18,15 +18,21 @@ class Peace::ServiceCatalog
           raise "Requires either :rackspace or :openstack as `host`"
         end
 
-      auth_url = info[:auth_url]
-      body     = info[:body]
-      region   = info[:region]
-      headers  = { content_type: :json, accept: :json }
-      response = ::RestClient.post(auth_url, body, headers)
-      token    = response.headers[:x_subject_token]
-      body     = JSON.parse(response.body)
-      catalog  = body['token']['catalog']
+      if ENV['SC_STUB'] == 'true'
+        file  = File.read("#{Dir.pwd}/spec/support/service_catalog.json")
+        token = "TEST_TOKEN"
+        body  = JSON.parse(file)
+      else
+        auth_url = info[:auth_url]
+        body     = info[:body]
+        region   = info[:region]
+        headers  = { content_type: :json, accept: :json }
+        response = ::RestClient.post(auth_url, body, headers)
+        token    = response.headers[:x_subject_token]
+        body     = JSON.parse(response.body)
+      end
 
+      catalog = body['token']['catalog']
       Peace::ServiceCatalog.new(catalog, token, host)
     end
 

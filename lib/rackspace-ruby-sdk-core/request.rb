@@ -14,7 +14,7 @@ class Peace::Request
 
     def post(url, data)
       request! do
-        Peace.logger.debug "POST: #{url}: #{data}"
+        Peace.logger.debug "POST: #{url}: #{data.to_json}"
         response = RestClient.post(url, data.to_json, headers)
         Peace.logger.debug response
         response
@@ -23,7 +23,7 @@ class Peace::Request
 
     def put(url, data)
       request! do
-        Peace.logger.debug "PUT: #{url}: #{data}"
+        Peace.logger.debug "PUT: #{url}: #{data.to_json}"
         response = RestClient.put(url, data.to_json, headers)
         Peace.logger.debug response
         response
@@ -47,11 +47,9 @@ class Peace::Request
     rescue JSON::ParserError => e
       raise Peace::BadRequest.new(e)
     rescue RestClient::Conflict => e
-      msg = JSON.parse(e.response)["conflictingRequest"]["message"]
-      raise Peace::BadRequest.new(msg)
+      raise Peace::BadRequest.new(e.response)
     rescue RestClient::BadRequest => e
-      msg = JSON.parse(e.response)["badRequest"]["message"]
-      raise Peace::BadRequest.new(msg)
+      raise Peace::BadRequest.new(e.response)
     end
 
     def headers

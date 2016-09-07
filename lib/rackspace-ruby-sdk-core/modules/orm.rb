@@ -23,6 +23,7 @@ module Peace::ORM
   def url
     url = self.class.collection_url
     url << "/#{id}" if self.id
+    url << "/ID" if ENV["SC_STUB"] == "true"
     url
   end
 
@@ -42,7 +43,7 @@ module Peace::ORM
 
     # Find a particular object
     def find(id)
-      all.find{ |o| o.id == id.to_s }
+      all.find{ |o| o.id.to_s == id.to_s }
     end
 
     # Get the first object

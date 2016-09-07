@@ -13,6 +13,8 @@ module Peace::Model
       include ActiveModel::Validations
       include Peace::ORM
       include Peace::Association
+      include Peace::Endpoints
+      include Peace::Payload
     end
   end
 
